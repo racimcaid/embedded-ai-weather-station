@@ -1,0 +1,19 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Python / notebooks
+__pycache__/
+.ipynb_checkpoints/
+
+# Arduino build files
+build/
+*.elf
+*.bin
+*.hex
+
+# Temporary files
+*.log
+*.tmp
