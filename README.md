@@ -6,22 +6,24 @@
 ![Machine Learning](https://img.shields.io/badge/ML-Weather%20Prediction-brightgreen)
 ![Status](https://img.shields.io/badge/Status-Prototype-informational)
 
-An end-to-end embedded weather station built on **Arduino GIGA R1 WiFi**, combining **real-time environmental sensing**, an **on-device machine learning model** for **temperature forecasting (+1 hour)**, and an **embedded web dashboard** for live monitoring.
+An end-to-end embedded weather station built on **Arduino GIGA R1 WiFi**, combining **real-time environmental sensing**, **on-device machine learning inference** for **+1 hour temperature forecasting**, and a lightweight **embedded web dashboard** for live monitoring.
 
 ---
 
 ## Overview
 
-This project was developed as an embedded systems and AI integration project to demonstrate the complete pipeline from **data-driven model design** to **deployment on a microcontroller**.
+This project was developed to demonstrate a complete embedded AI pipeline, from **data preparation and model design** to **deployment on a microcontroller**.
 
-The system:
-- acquires real-time weather data from multiple sensors,
-- estimates wind speed, wind direction, and rainfall,
-- runs a **local AI inference pipeline** on the embedded target,
-- predicts the **next-hour temperature**,
-- exposes all measurements through a **WiFi-hosted dashboard and JSON endpoint**.
+The system is capable of:
 
-The objective was not only to build a weather station, but to design a **full embedded intelligent system** integrating:
+- acquiring real-time environmental data from multiple sensors,
+- estimating wind speed, wind direction, and rainfall,
+- running a fully local AI inference pipeline on the embedded target,
+- predicting the **next-hour temperature**,
+- exposing live measurements through a **WiFi-hosted dashboard** and a **JSON API endpoint**.
+
+Beyond a simple weather station, this project was designed as a full embedded intelligent system integrating:
+
 - hardware interfacing,
 - signal acquisition,
 - non-blocking firmware scheduling,
@@ -44,8 +46,8 @@ The objective was not only to build a weather station, but to design a **full em
 
 ## Key Features
 
-- **Arduino GIGA R1 WiFi** based embedded platform
-- **BME680** environmental sensor for:
+- **Arduino GIGA R1 WiFi** as the main embedded platform
+- **BME680** environmental sensing for:
   - temperature
   - humidity
   - pressure
@@ -54,13 +56,13 @@ The objective was not only to build a weather station, but to design a **full em
   - **anemometer**
   - **wind vane**
   - **tipping bucket rain gauge**
-- **Embedded web server** with:
-  - live dashboard
+- **Embedded web server** providing:
+  - a live dashboard
   - real-time charts
-  - JSON API endpoint
+  - a JSON API endpoint
 - **On-device AI inference**
-- **Temperature prediction at +1h**
-- End-to-end pipeline from:
+- **+1 hour temperature prediction**
+- Complete pipeline from:
   - training notebook
   - model export
   - TensorFlow Lite conversion
@@ -71,38 +73,38 @@ The objective was not only to build a weather station, but to design a **full em
 
 ## System Architecture
 
-The project is organized as a complete embedded AI pipeline:
+The project is structured as a complete embedded AI pipeline:
 
-1. **Sensor acquisition**
-   - BME680 over I2C for environmental data
-   - wind and rain sensors through digital interrupts and analog measurement
+### 1. Sensor acquisition
+- BME680 over I2C for environmental measurements
+- wind and rain sensors handled through digital interrupts and analog reading
 
-2. **Signal processing**
-   - pulse counting for wind speed
-   - resistance-based lookup for wind direction
-   - tipping bucket accumulation for rainfall
+### 2. Signal processing
+- pulse counting for wind speed
+- resistance-based lookup for wind direction
+- tipping bucket accumulation for rainfall
 
-3. **Historical feature construction**
-   - sliding window of the last 6 measurement steps
-   - features built from:
-     - temperature
-     - humidity
-     - pressure
+### 3. Historical feature construction
+- sliding window built from the last **6 measurement steps**
+- features extracted from:
+  - temperature
+  - humidity
+  - pressure
 
-4. **Time feature encoding**
-   - cyclic encoding of:
-     - hour
-     - month
-   - using sine/cosine representation
+### 4. Time feature encoding
+- cyclic encoding of:
+  - hour
+  - month
+- implemented using sine/cosine representation
 
-5. **Embedded AI inference**
-   - normalized feature vector
-   - TensorFlow Lite model executed locally through **ArduTFLite**
-   - next-hour temperature prediction
+### 5. Embedded AI inference
+- normalized feature vector generation
+- local TensorFlow Lite inference using **ArduTFLite**
+- prediction of **temperature at t+1 hour**
 
-6. **Data serving**
-   - JSON endpoint on `/data`
-   - HTML dashboard on `/`
+### 6. Data serving
+- JSON endpoint available at `/data`
+- HTML dashboard available at `/`
 
 ---
 
@@ -118,7 +120,7 @@ The project is organized as a complete embedded AI pipeline:
   - **wind vane**
   - **tipping bucket rain gauge**
 
-### Measured variables
+### Measured Variables
 - temperature
 - humidity
 - pressure
@@ -131,26 +133,28 @@ The project is organized as a complete embedded AI pipeline:
 
 ## Machine Learning Pipeline
 
-The AI part of the project was first developed and validated offline in Jupyter notebooks, then exported to the embedded platform.
+The AI workflow was first developed and validated offline in Jupyter notebooks, then exported to the embedded target.
 
 ### Dataset
 The model was trained using the **Guangzhou subset** of the **PM2.5 Data of Five Chinese Cities** dataset from the **UCI Machine Learning Repository**.
 
-### Prediction target
+### Prediction Target
 The embedded model predicts:
 
 - **temperature at t+1 hour**
 
-### Selected input variables
-Only the most relevant variables for the embedded use case were retained:
+### Selected Input Variables
+Only the variables most relevant to the embedded use case were retained:
+
 - **TEMP**
 - **HUMI**
 - **PRES**
 
-### Feature engineering
+### Feature Engineering
 A supervised learning dataset was built using a **6-step sliding window**.
 
 The final input vector contains **22 features**:
+
 - **18 historical features**
   - 6 temperature values
   - 6 humidity values
@@ -163,14 +167,14 @@ The final input vector contains **22 features**:
 
 ### Preprocessing
 - chronological sorting by timestamp
-- missing value removal
-- feature standardization with **StandardScaler**
+- removal of missing values
+- feature standardization using **StandardScaler**
 - chronological train / validation / test split:
   - **70% train**
   - **15% validation**
   - **15% test**
 
-### Model architecture
+### Model Architecture
 A compact **MLP** was selected for embedded deployment:
 
 - input: **22 features**
@@ -178,7 +182,7 @@ A compact **MLP** was selected for embedded deployment:
 - hidden layer 2: **Dense(16, ReLU)**
 - output: **Dense(1)**
 
-### Training strategy
+### Training Strategy
 - optimizer: **Adam**
 - loss: **MSE**
 - metric: **MAE**
@@ -190,36 +194,37 @@ A compact **MLP** was selected for embedded deployment:
 
 After training, the Keras model was converted to **TensorFlow Lite** and then exported as a C header for microcontroller integration.
 
-Deployment workflow:
-1. train the model in TensorFlow / Keras
-2. export the trained `.keras` model
-3. convert it to `.tflite`
-4. convert the `.tflite` binary into `model_data.h`
-5. load the model in the Arduino firmware using **ArduTFLite**
-6. run inference directly on the board
+### Deployment Workflow
+1. Train the model in TensorFlow / Keras
+2. Export the trained `.keras` model
+3. Convert it to `.tflite`
+4. Convert the `.tflite` file into `model_data.h`
+5. Load the model in the Arduino firmware using **ArduTFLite**
+6. Run inference directly on the board
 
-This approach allows the system to perform **fully local prediction**, without any cloud dependency.
+This workflow enables **fully local prediction**, without any cloud dependency.
 
 ---
 
 ## Results
 
-### Test performance
+### Test Performance
 The trained MLP achieved:
 
 - **Test MAE:** `0.4257 °C`
 - **Test RMSE:** `0.6706 °C`
 
-### Baseline comparison
-A naive baseline using the current temperature as the next-hour prediction gave:
+### Baseline Comparison
+A naive persistence baseline using the current temperature as the next-hour prediction achieved:
 
 - **Baseline MAE:** `0.6274 °C`
 - **Baseline RMSE:** `0.9465 °C`
 
-The MLP therefore improves significantly over a simple persistence-based baseline.
+The MLP therefore provides a clear improvement over a simple baseline.
 
-### Functional prototype results
+### Functional Prototype Results
 The embedded prototype successfully demonstrates:
+
 - real-time acquisition of environmental data
 - wind and rain event counting
 - live web dashboard visualization
@@ -231,31 +236,34 @@ The embedded prototype successfully demonstrates:
 ## Embedded Firmware Highlights
 
 The firmware includes:
+
 - non-blocking task scheduling using `millis()`
 - interrupt-based wind and rain counting
 - BME680 acquisition over I2C
 - wind direction estimation through resistance lookup
 - AI history buffer construction
-- feature normalization on-device
+- on-device feature normalization
 - embedded TensorFlow Lite inference
 - JSON serialization for web communication
-- HTML + Chart.js dashboard generation directly from firmware
+- direct generation of HTML + Chart.js dashboard content from firmware
 
 ---
 
 ## Web Interface
 
-The board hosts a lightweight web interface that displays:
+The board hosts a lightweight web interface displaying:
+
 - temperature
 - humidity
 - pressure
 - wind speed
 - rainfall
 - wind direction
-- AI prediction at +1h
+- AI prediction at +1 hour
 - AI history buffer status
 
 The dashboard also includes real-time charts for:
+
 - temperature
 - humidity
 - pressure
@@ -294,43 +302,51 @@ embedded-ai-weather-station/
 └── results/
     └── demo-video/
         └── demo.mp4
+```
+
+---
+
 ## Getting Started
 
 ### 1. Hardware setup
 
 Connect:
-- the **BME680** to the Arduino GIGA R1 WiFi through I2C
-- the weather meter kit sensors to the corresponding analog/digital pins used in the firmware
+
+- the **BME680** to the Arduino GIGA R1 WiFi through I2C,
+- the weather meter kit sensors to the corresponding analog/digital pins used in the firmware.
 
 ### 2. Install Arduino dependencies
 
 Install the required libraries:
+
 - `Adafruit_BME680`
 - `Adafruit_Sensor`
 - `ArduTFLite`
 
 ### 3. Configure WiFi
 
-In the Arduino sketch, replace:
+In the Arduino sketch, replace the placeholder credentials with your local WiFi settings:
 
 ```cpp
 char ssid[] = "YOUR_WIFI_SSID";
 char pass[] = "YOUR_WIFI_PASSWORD";
-with your local WiFi credentials.
+```
 
 ### 4. Upload the firmware
 
-Open the Arduino project and upload the firmware to the Arduino GIGA R1 WiFi.
+Open the Arduino project and upload the firmware to the **Arduino GIGA R1 WiFi**.
 
 ### 5. Access the dashboard
 
-Once connected to WiFi, open the board IP address in your browser.
+Once the board is connected to WiFi, open its IP address in your browser.
+
+---
 
 ## Prototype Notes
 
-This repository reflects a **working prototype** and also documents the current engineering trade-offs.
+This repository reflects a **working prototype** and documents the current engineering trade-offs.
 
-### Current prototype assumptions
+### Current Prototype Assumptions
 
 - `HISTORY_INTERVAL_MS = 10000UL` is used for **demonstration purposes**
   - this accelerates validation of the AI pipeline
@@ -338,7 +354,7 @@ This repository reflects a **working prototype** and also documents the current 
 - `CURRENT_HOUR` and `CURRENT_MONTH` are **manually fixed**
   - future versions should retrieve real time from **RTC** or **NTP**
 - the current setup is a **bench prototype**
-  - not yet an outdoor ruggedized system
+  - it is not yet an outdoor ruggedized system
 - WiFi credentials are intentionally left as placeholders in the public repository
 
 This section is intentionally transparent: the goal of this repository is to present both the **validated functionalities** and the **next engineering steps**.
@@ -361,7 +377,7 @@ Planned next steps include:
 
 ## Why This Project Matters
 
-This project showcases the ability to design and integrate a complete embedded system combining:
+This project showcases the design and integration of a complete embedded intelligent system combining:
 
 - sensor interfacing
 - microcontroller firmware development
@@ -371,7 +387,7 @@ This project showcases the ability to design and integrate a complete embedded s
 - model deployment on constrained hardware
 - end-to-end embedded AI engineering
 
-It is intended as a portfolio project for **embedded systems**, **edge AI**, and **intelligent connected devices** roles.
+It is intended as a portfolio project for roles in **embedded systems**, **edge AI**, and **intelligent connected devices**.
 
 ---
 
