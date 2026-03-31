@@ -294,3 +294,105 @@ embedded-ai-weather-station/
 └── results/
     └── demo-video/
         └── demo.mp4
+## Getting Started
+
+### 1. Hardware setup
+
+Connect:
+- the **BME680** to the Arduino GIGA R1 WiFi through I2C
+- the weather meter kit sensors to the corresponding analog/digital pins used in the firmware
+
+### 2. Install Arduino dependencies
+
+Install the required libraries:
+- `Adafruit_BME680`
+- `Adafruit_Sensor`
+- `ArduTFLite`
+
+### 3. Configure WiFi
+
+In the Arduino sketch, replace:
+
+```cpp
+char ssid[] = "YOUR_WIFI_SSID";
+char pass[] = "YOUR_WIFI_PASSWORD";
+with your local WiFi credentials.
+
+### 4. Upload the firmware
+
+Open the Arduino project and upload the firmware to the Arduino GIGA R1 WiFi.
+
+### 5. Access the dashboard
+
+Once connected to WiFi, open the board IP address in your browser.
+
+## Prototype Notes
+
+This repository reflects a **working prototype** and also documents the current engineering trade-offs.
+
+### Current prototype assumptions
+
+- `HISTORY_INTERVAL_MS = 10000UL` is used for **demonstration purposes**
+  - this accelerates validation of the AI pipeline
+  - in a real hourly deployment, this interval should be set to **1 hour**
+- `CURRENT_HOUR` and `CURRENT_MONTH` are **manually fixed**
+  - future versions should retrieve real time from **RTC** or **NTP**
+- the current setup is a **bench prototype**
+  - not yet an outdoor ruggedized system
+- WiFi credentials are intentionally left as placeholders in the public repository
+
+This section is intentionally transparent: the goal of this repository is to present both the **validated functionalities** and the **next engineering steps**.
+
+---
+
+## Future Improvements
+
+Planned next steps include:
+
+- replacing fixed time features with real-time clock or NTP synchronization
+- using true hourly historical sampling in deployment mode
+- improving enclosure and field robustness
+- adding persistent local storage for measurements
+- extending prediction targets to additional weather variables
+- evaluating lightweight recurrent or temporal models for comparison
+- improving calibration and long-term outdoor reliability
+
+---
+
+## Why This Project Matters
+
+This project showcases the ability to design and integrate a complete embedded system combining:
+
+- sensor interfacing
+- microcontroller firmware development
+- real-time data acquisition
+- web-based embedded visualization
+- machine learning preprocessing
+- model deployment on constrained hardware
+- end-to-end embedded AI engineering
+
+It is intended as a portfolio project for **embedded systems**, **edge AI**, and **intelligent connected devices** roles.
+
+---
+
+## Author
+
+**Racim Caid**  
+Master’s student in **Complex Systems Engineering**  
+Focused on **embedded systems**, **edge AI**, and intelligent electronic systems.
+
+---
+
+## Credits
+
+- **UCI Machine Learning Repository** — *PM2.5 Data of Five Chinese Cities*
+- **Arduino**
+- **Adafruit**
+- **TensorFlow / TensorFlow Lite**
+- Weather meter kit datasheet included in this repository
+
+---
+
+## License
+
+This project is distributed under the **MIT License**.
